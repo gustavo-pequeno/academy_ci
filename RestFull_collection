@@ -1,0 +1,1129 @@
+{
+	"info": {
+		"_postman_id": "5c26e5ae-0498-4f78-9221-8dc159d55422",
+		"name": "Server Rest Full | Caminho Feliz",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23799089"
+	},
+	"item": [
+		{
+			"name": "New User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"Name\", pm.variables.replaceIn('{{$randomFullName}}'))\r",
+							"pm.environment.set(\"Email\", pm.variables.replaceIn('{{$randomEmail}}'))\r",
+							"pm.environment.set(\"Password\", pm.variables.replaceIn('{{$randomPassword}}'))\r",
+							"pm.environment.set(\"Boolean\", pm.variables.replaceIn('{{$randomBoolean}}'))"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 201) {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Cadastro realizado com sucesso\")\r",
+							"   }\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nome\": \"{{Name}}\",\r\n    \"email\": \"{{Email}}\",\r\n    \"password\": \"{{Password}}\",\r\n    \"administrador\": \"{{Boolean}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/usuarios",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 200) {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Login realizado com sucesso\")\r",
+							"   }\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"Token\", JSON.parse(responseBody).authorization)\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"      url:  \"https://serverest.dev/usuarios\", \r",
+							"      method: 'GET',\r",
+							"      header: {\r",
+							"        'Accept': 'application/json',\r",
+							"      }\r",
+							"  }, function (err, res) {\r",
+							"    var email = []\r",
+							"    var senha = []\r",
+							"    var data = res.json();\r",
+							"    console.log(data)\r",
+							"    for (let i = 0; i < data.usuarios.length; i++) {\r",
+							"        var push_email = email.push(data.usuarios[i].email) \r",
+							"        var push_senha = senha.push(data.usuarios[i].password)\r",
+							"        console.log(email)\r",
+							"}    \r",
+							"    function RandomUser() {\r",
+							"        randomUser = email [Math.floor(Math.random() * email.length)]\r",
+							"        getIndex = email.indexOf(randomUser)\r",
+							"        return getIndex\r",
+							"}\r",
+							"    let indexUser = RandomUser()\r",
+							"    console.log(indexUser)\r",
+							"    pm.environment.set(\"Email\", email[indexUser])\r",
+							"    pm.environment.set(\"Password\", senha[indexUser])\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{Email}}\",\r\n  \"password\": \"{{Password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cadastro de Produto",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 201) {\r",
+							"        pm.expect(jsonData.message).to.eql(\"Cadastro realizado com sucesso\");\r",
+							"        pm.environment.set(\"ProductID\" , jsonData._id)\r",
+							"   } else if(pm.response.code === 403) {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Rota exclusiva para administradores\")\r",
+							"   }\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"product\", pm.variables.replaceIn('{{$randomProductName}}'))\r",
+							"\r",
+							"pm.environment.set(\"price\", pm.variables.replaceIn('{{$randomInt}}'))\r",
+							"\r",
+							"pm.environment.set(\"desc\", pm.variables.replaceIn('{{$randomProductAdjective}}'))\r",
+							"\r",
+							"pm.environment.set(\"qnt\", pm.variables.replaceIn('{{$randomInt}}'))\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"{{product}}\",\r\n  \"preco\": {{price}},\r\n  \"descricao\": \"{{desc}}\",\r\n  \"quantidade\": {{qnt}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/produtos",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"produtos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Produtos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const schema = {\r",
+							"    \"$id\": \"http://example.com/example.json\",\r",
+							"    \"type\": \"object\",\r",
+							"    \"default\": {},\r",
+							"    \"title\": \"Root Schema\",\r",
+							"    \"required\": [\r",
+							"        \"quantidade\",\r",
+							"        \"produtos\"\r",
+							"    ],\r",
+							"    \"properties\": {\r",
+							"        \"quantidade\": {\r",
+							"            \"type\": \"integer\",\r",
+							"            \"default\": 0,\r",
+							"            \"title\": \"The quantidade Schema\",\r",
+							"            \"examples\": [\r",
+							"                2\r",
+							"            ]\r",
+							"        },\r",
+							"        \"produtos\": {\r",
+							"            \"type\": \"array\",\r",
+							"            \"default\": [],\r",
+							"            \"title\": \"The produtos Schema\",\r",
+							"            \"items\": {\r",
+							"                \"type\": \"object\",\r",
+							"                \"title\": \"A Schema\",\r",
+							"                \"required\": [\r",
+							"                    \"nome\",\r",
+							"                    \"preco\",\r",
+							"                    \"descricao\",\r",
+							"                    \"quantidade\",\r",
+							"                    \"_id\"\r",
+							"                ],\r",
+							"                \"properties\": {\r",
+							"                    \"nome\": {\r",
+							"                        \"type\": \"string\",\r",
+							"                        \"title\": \"The nome Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            \"Refined Concrete Cheese Alterado\",\r",
+							"                            \"Samsung 60 polegadas\"\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"preco\": {\r",
+							"                        \"type\": \"integer\",\r",
+							"                        \"title\": \"The preco Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            327,\r",
+							"                            5240\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"descricao\": {\r",
+							"                        \"type\": \"string\",\r",
+							"                        \"title\": \"The descricao Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            \"Awesome Nova Desc\",\r",
+							"                            \"TV\"\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"quantidade\": {\r",
+							"                        \"type\": \"integer\",\r",
+							"                        \"title\": \"The quantidade Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            795,\r",
+							"                            49977\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"_id\": {\r",
+							"                        \"type\": \"string\",\r",
+							"                        \"title\": \"The _id Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            \"BeeJh5lz3k6kSIzA\",\r",
+							"                            \"K6leHdftCeOJj8BJ\"\r",
+							"                        ]\r",
+							"                    }\r",
+							"                },\r",
+							"                \"examples\": [{\r",
+							"                    \"nome\": \"Refined Concrete Cheese Alterado\",\r",
+							"                    \"preco\": 327,\r",
+							"                    \"descricao\": \"Awesome Nova Desc\",\r",
+							"                    \"quantidade\": 795,\r",
+							"                    \"_id\": \"BeeJh5lz3k6kSIzA\"\r",
+							"                },\r",
+							"                {\r",
+							"                    \"nome\": \"Samsung 60 polegadas\",\r",
+							"                    \"preco\": 5240,\r",
+							"                    \"descricao\": \"TV\",\r",
+							"                    \"quantidade\": 49977,\r",
+							"                    \"_id\": \"K6leHdftCeOJj8BJ\"\r",
+							"                }]\r",
+							"            },\r",
+							"            \"examples\": [\r",
+							"                [{\r",
+							"                    \"nome\": \"Refined Concrete Cheese Alterado\",\r",
+							"                    \"preco\": 327,\r",
+							"                    \"descricao\": \"Awesome Nova Desc\",\r",
+							"                    \"quantidade\": 795,\r",
+							"                    \"_id\": \"BeeJh5lz3k6kSIzA\"\r",
+							"                },\r",
+							"                {\r",
+							"                    \"nome\": \"Samsung 60 polegadas\",\r",
+							"                    \"preco\": 5240,\r",
+							"                    \"descricao\": \"TV\",\r",
+							"                    \"quantidade\": 49977,\r",
+							"                    \"_id\": \"K6leHdftCeOJj8BJ\"\r",
+							"                }]\r",
+							"            ]\r",
+							"        }\r",
+							"    },\r",
+							"    \"examples\": [{\r",
+							"        \"quantidade\": 2,\r",
+							"        \"produtos\": [{\r",
+							"            \"nome\": \"Refined Concrete Cheese Alterado\",\r",
+							"            \"preco\": 327,\r",
+							"            \"descricao\": \"Awesome Nova Desc\",\r",
+							"            \"quantidade\": 795,\r",
+							"            \"_id\": \"BeeJh5lz3k6kSIzA\"\r",
+							"        },\r",
+							"        {\r",
+							"            \"nome\": \"Samsung 60 polegadas\",\r",
+							"            \"preco\": 5240,\r",
+							"            \"descricao\": \"TV\",\r",
+							"            \"quantidade\": 49977,\r",
+							"            \"_id\": \"K6leHdftCeOJj8BJ\"\r",
+							"        }]\r",
+							"    }]\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validar o corpo da resposta\", function(){\r",
+							"    pm.response.to.have.jsonSchema(schema)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/produtos",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"produtos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pesquisa de Produto",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"      url:  \"https://serverest.dev/produtos\", \r",
+							"      method: 'GET',\r",
+							"      header: {\r",
+							"        'Accept': 'application/json',\r",
+							"      },\r",
+							"      body: {}\r",
+							"  }, function (err, res) {\r",
+							"    var lista = []\r",
+							"    var data = res.json();\r",
+							"    for (let i = 0; i < data.produtos.length; i++) {\r",
+							"        var push_list = lista.push(data.produtos[i]._id)\r",
+							"}    \r",
+							"    function RandomizaID() {\r",
+							"        randomItem = lista [Math.floor(Math.random() * lista.length)];\r",
+							"    \r",
+							"    return randomItem\r",
+							"}\r",
+							"\r",
+							"     pm.environment.set(\"ProductID\", RandomizaID())\r",
+							"\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const schema = {\r",
+							"    \"$id\": \"http://example.com/example.json\",\r",
+							"    \"type\": \"object\",\r",
+							"    \"default\": {},\r",
+							"    \"title\": \"Root Schema\",\r",
+							"    \"required\": [\r",
+							"        \"nome\",\r",
+							"        \"preco\",\r",
+							"        \"descricao\",\r",
+							"        \"quantidade\",\r",
+							"        \"_id\"\r",
+							"    ],\r",
+							"    \"properties\": {\r",
+							"        \"nome\": {\r",
+							"            \"type\": \"string\",\r",
+							"            \"default\": \"\",\r",
+							"            \"title\": \"The nome Schema\",\r",
+							"            \"examples\": [\r",
+							"                \"Samsung 60 polegadas\"\r",
+							"            ]\r",
+							"        },\r",
+							"        \"preco\": {\r",
+							"            \"type\": \"integer\",\r",
+							"            \"default\": 0,\r",
+							"            \"title\": \"The preco Schema\",\r",
+							"            \"examples\": [\r",
+							"                5240\r",
+							"            ]\r",
+							"        },\r",
+							"        \"descricao\": {\r",
+							"            \"type\": \"string\",\r",
+							"            \"default\": \"\",\r",
+							"            \"title\": \"The descricao Schema\",\r",
+							"            \"examples\": [\r",
+							"                \"TV\"\r",
+							"            ]\r",
+							"        },\r",
+							"        \"quantidade\": {\r",
+							"            \"type\": \"integer\",\r",
+							"            \"default\": 0,\r",
+							"            \"title\": \"The quantidade Schema\",\r",
+							"            \"examples\": [\r",
+							"                49977\r",
+							"            ]\r",
+							"        },\r",
+							"        \"_id\": {\r",
+							"            \"type\": \"string\",\r",
+							"            \"default\": \"\",\r",
+							"            \"title\": \"The _id Schema\",\r",
+							"            \"examples\": [\r",
+							"                \"K6leHdftCeOJj8BJ\"\r",
+							"            ]\r",
+							"        }\r",
+							"    },\r",
+							"    \"examples\": [{\r",
+							"        \"nome\": \"Samsung 60 polegadas\",\r",
+							"        \"preco\": 5240,\r",
+							"        \"descricao\": \"TV\",\r",
+							"        \"quantidade\": 49977,\r",
+							"        \"_id\": \"K6leHdftCeOJj8BJ\"\r",
+							"    }]\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validar o corpo da resposta\", function(){\r",
+							"    pm.response.to.have.jsonSchema(schema)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/produtos/{{ProductID}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"produtos",
+						"{{ProductID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Alterar Produto",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 200) {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Registro alterado com sucesso\")\r",
+							"   }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 400) {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Já existe produto com esse nome\")\r",
+							"   }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"      url:  \"https://serverest.dev/produtos\", \r",
+							"      method: 'GET',\r",
+							"      header: {\r",
+							"        'Accept': 'application/json',\r",
+							"      },\r",
+							"      body: {}\r",
+							"  }, function (err, res) {\r",
+							"    var productID = []\r",
+							"    var data = res.json();\r",
+							"\r",
+							"    for (let i = 0; i < data.produtos.length; i++) {\r",
+							"        var push_product = productID.push(data.produtos[i]._id) \r",
+							"    \r",
+							"}    \r",
+							"    function randomItem() {\r",
+							"        randomProduct = productID [Math.floor(Math.random() * productID.length)]\r",
+							"        return randomProduct\r",
+							"}\r",
+							"    pm.environment.set(\"ProductID\", randomItem())\r",
+							"    \r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"product\", pm.variables.replaceIn('{{$randomProductName}}' + \" \" + \"Alterado\"))\r",
+							"pm.environment.set(\"desc\", pm.variables.replaceIn('{{$randomProductAdjective}}' + \" \" + \"Nova Desc\"))\r",
+							"pm.environment.set(\"price\", pm.variables.replaceIn('{{$randomInt}}'))\r",
+							"pm.environment.set(\"qnt\", pm.variables.replaceIn('{{$randomInt}}'))"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"{{product}}\",\r\n  \"preco\": {{price}},\r\n  \"descricao\": \"{{desc}}\",\r\n  \"quantidade\": {{qnt}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/produtos/{{ProductID}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"produtos",
+						"{{ProductID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletar Produto",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"      url:  \"https://serverest.dev/produtos\", \r",
+							"      method: 'GET',\r",
+							"      header: {\r",
+							"        'Accept': 'application/json',\r",
+							"      },\r",
+							"      body: {}\r",
+							"  }, function (err, res) {\r",
+							"    var productID = []\r",
+							"    var data = res.json();\r",
+							"\r",
+							"    for (let i = 0; i < data.produtos.length; i++) {\r",
+							"        var push_product = productID.push(data.produtos[i]._id) \r",
+							"    \r",
+							"}    \r",
+							"    function randomItem() {\r",
+							"        randomProduct = productID [Math.floor(Math.random() * productID.length)]\r",
+							"        return randomProduct\r",
+							"}\r",
+							"    pm.environment.set(\"ProductID\", randomItem())\r",
+							"    \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 200) {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Registro excluído com sucesso\")\r",
+							"   } else {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Não é permitido excluir produto que faz parte de carrinho\")\r",
+							"   }\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/produtos/{{ProductID}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"produtos",
+						"{{ProductID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar um Carrinho",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"      url:  \"https://serverest.dev/produtos\", \r",
+							"      method: 'GET',\r",
+							"      header: {\r",
+							"        'Accept': 'application/json',\r",
+							"      },\r",
+							"      body: {}\r",
+							"  }, function (err, res) {\r",
+							"    var lista = []\r",
+							"    var data = res.json();\r",
+							"    for (let i = 0; i < data.produtos.length; i++) {\r",
+							"        var push_list = lista.push(data.produtos[i]._id)\r",
+							"}    \r",
+							"    function RandomizaID() {\r",
+							"        randomItem = lista [Math.floor(Math.random() * lista.length)];\r",
+							"    \r",
+							"    return randomItem\r",
+							"}\r",
+							"\r",
+							"     pm.environment.set(\"ProductID\", RandomizaID())\r",
+							"     pm.environment.set(\"Product2ID\", RandomizaID())\r",
+							"\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"qnt\", pm.variables.replaceIn('{{$randomInt}}'))"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 201) {\r",
+							"        pm.expect(jsonData.message).to.eql(\"Cadastro realizado com sucesso\");\r",
+							"        pm.environment.set(\"ProductID\" , jsonData._id)\r",
+							"   } else if(pm.response.code === 400 && jsonData.message == \"Produto não possui quantidade suficiente\") {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Produto não possui quantidade suficiente\")\r",
+							"   } else if(pm.response.code === 400 && jsonData.message == \"Não é permitido possuir produto duplicado\") {\r",
+							"       pm.expect(jsonData.message).to.eql(\"Não é permitido possuir produto duplicado\")\r",
+							"   }\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"produtos\": [\r\n    {\r\n        \"idProduto\": \"BeeJh5lz3k6kSIzA\",\r\n        \"quantidade\": 1\r\n    },\r\n    {\r\n        \"idProduto\": \"{{ProductID}}\",\r\n        \"quantidade\": {{qnt}}\r\n    },\r\n    {\r\n        \"idProduto\": \"{{Product2ID}}\",\r\n        \"quantidade\": {{qnt}}\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/carrinhos",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"carrinhos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Busca de todos os carrinhos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const schema = {\r",
+							"    \"$id\": \"http://example.com/example.json\",\r",
+							"    \"type\": \"object\",\r",
+							"    \"default\": {},\r",
+							"    \"title\": \"Root Schema\",\r",
+							"    \"required\": [\r",
+							"        \"quantidade\",\r",
+							"        \"carrinhos\"\r",
+							"    ],\r",
+							"    \"properties\": {\r",
+							"        \"quantidade\": {\r",
+							"            \"type\": \"integer\",\r",
+							"            \"default\": 0,\r",
+							"            \"title\": \"The quantidade Schema\",\r",
+							"            \"examples\": [\r",
+							"                1\r",
+							"            ]\r",
+							"        },\r",
+							"        \"carrinhos\": {\r",
+							"            \"type\": \"array\",\r",
+							"            \"default\": [],\r",
+							"            \"title\": \"The carrinhos Schema\",\r",
+							"            \"items\": {\r",
+							"                \"type\": \"object\",\r",
+							"                \"default\": {},\r",
+							"                \"title\": \"A Schema\",\r",
+							"                \"required\": [\r",
+							"                    \"produtos\",\r",
+							"                    \"precoTotal\",\r",
+							"                    \"quantidadeTotal\",\r",
+							"                    \"idUsuario\",\r",
+							"                    \"_id\"\r",
+							"                ],\r",
+							"                \"properties\": {\r",
+							"                    \"produtos\": {\r",
+							"                        \"type\": \"array\",\r",
+							"                        \"default\": [],\r",
+							"                        \"title\": \"The produtos Schema\",\r",
+							"                        \"items\": {\r",
+							"                            \"type\": \"object\",\r",
+							"                            \"title\": \"A Schema\",\r",
+							"                            \"required\": [\r",
+							"                                \"idProduto\",\r",
+							"                                \"quantidade\",\r",
+							"                                \"precoUnitario\"\r",
+							"                            ],\r",
+							"                            \"properties\": {\r",
+							"                                \"idProduto\": {\r",
+							"                                    \"type\": \"string\",\r",
+							"                                    \"title\": \"The idProduto Schema\",\r",
+							"                                    \"examples\": [\r",
+							"                                        \"BeeJh5lz3k6kSIzA\",\r",
+							"                                        \"K6leHdftCeOJj8BJ\"\r",
+							"                                    ]\r",
+							"                                },\r",
+							"                                \"quantidade\": {\r",
+							"                                    \"type\": \"integer\",\r",
+							"                                    \"title\": \"The quantidade Schema\",\r",
+							"                                    \"examples\": [\r",
+							"                                        2,\r",
+							"                                        1\r",
+							"                                    ]\r",
+							"                                },\r",
+							"                                \"precoUnitario\": {\r",
+							"                                    \"type\": \"integer\",\r",
+							"                                    \"title\": \"The precoUnitario Schema\",\r",
+							"                                    \"examples\": [\r",
+							"                                        470,\r",
+							"                                        5240\r",
+							"                                    ]\r",
+							"                                }\r",
+							"                            },\r",
+							"                            \"examples\": [{\r",
+							"                                \"idProduto\": \"BeeJh5lz3k6kSIzA\",\r",
+							"                                \"quantidade\": 2,\r",
+							"                                \"precoUnitario\": 470\r",
+							"                            },\r",
+							"                            {\r",
+							"                                \"idProduto\": \"K6leHdftCeOJj8BJ\",\r",
+							"                                \"quantidade\": 1,\r",
+							"                                \"precoUnitario\": 5240\r",
+							"                            }]\r",
+							"                        },\r",
+							"                        \"examples\": [\r",
+							"                            [{\r",
+							"                                \"idProduto\": \"BeeJh5lz3k6kSIzA\",\r",
+							"                                \"quantidade\": 2,\r",
+							"                                \"precoUnitario\": 470\r",
+							"                            },\r",
+							"                            {\r",
+							"                                \"idProduto\": \"K6leHdftCeOJj8BJ\",\r",
+							"                                \"quantidade\": 1,\r",
+							"                                \"precoUnitario\": 5240\r",
+							"                            }]\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"precoTotal\": {\r",
+							"                        \"type\": \"integer\",\r",
+							"                        \"default\": 0,\r",
+							"                        \"title\": \"The precoTotal Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            6180\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"quantidadeTotal\": {\r",
+							"                        \"type\": \"integer\",\r",
+							"                        \"default\": 0,\r",
+							"                        \"title\": \"The quantidadeTotal Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            3\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"idUsuario\": {\r",
+							"                        \"type\": \"string\",\r",
+							"                        \"default\": \"\",\r",
+							"                        \"title\": \"The idUsuario Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            \"oUb7aGkMtSEPf6BZ\"\r",
+							"                        ]\r",
+							"                    },\r",
+							"                    \"_id\": {\r",
+							"                        \"type\": \"string\",\r",
+							"                        \"default\": \"\",\r",
+							"                        \"title\": \"The _id Schema\",\r",
+							"                        \"examples\": [\r",
+							"                            \"qbMqntef4iTOwWfg\"\r",
+							"                        ]\r",
+							"                    }\r",
+							"                },\r",
+							"                \"examples\": [{\r",
+							"                    \"produtos\": [{\r",
+							"                        \"idProduto\": \"BeeJh5lz3k6kSIzA\",\r",
+							"                        \"quantidade\": 2,\r",
+							"                        \"precoUnitario\": 470\r",
+							"                    },\r",
+							"                    {\r",
+							"                        \"idProduto\": \"K6leHdftCeOJj8BJ\",\r",
+							"                        \"quantidade\": 1,\r",
+							"                        \"precoUnitario\": 5240\r",
+							"                    }],\r",
+							"                    \"precoTotal\": 6180,\r",
+							"                    \"quantidadeTotal\": 3,\r",
+							"                    \"idUsuario\": \"oUb7aGkMtSEPf6BZ\",\r",
+							"                    \"_id\": \"qbMqntef4iTOwWfg\"\r",
+							"                }]\r",
+							"            },\r",
+							"            \"examples\": [\r",
+							"                [{\r",
+							"                    \"produtos\": [{\r",
+							"                        \"idProduto\": \"BeeJh5lz3k6kSIzA\",\r",
+							"                        \"quantidade\": 2,\r",
+							"                        \"precoUnitario\": 470\r",
+							"                    },\r",
+							"                    {\r",
+							"                        \"idProduto\": \"K6leHdftCeOJj8BJ\",\r",
+							"                        \"quantidade\": 1,\r",
+							"                        \"precoUnitario\": 5240\r",
+							"                    }],\r",
+							"                    \"precoTotal\": 6180,\r",
+							"                    \"quantidadeTotal\": 3,\r",
+							"                    \"idUsuario\": \"oUb7aGkMtSEPf6BZ\",\r",
+							"                    \"_id\": \"qbMqntef4iTOwWfg\"\r",
+							"                }]\r",
+							"            ]\r",
+							"        }\r",
+							"    },\r",
+							"    \"examples\": [{\r",
+							"        \"quantidade\": 1,\r",
+							"        \"carrinhos\": [{\r",
+							"            \"produtos\": [{\r",
+							"                \"idProduto\": \"BeeJh5lz3k6kSIzA\",\r",
+							"                \"quantidade\": 2,\r",
+							"                \"precoUnitario\": 470\r",
+							"            },\r",
+							"            {\r",
+							"                \"idProduto\": \"K6leHdftCeOJj8BJ\",\r",
+							"                \"quantidade\": 1,\r",
+							"                \"precoUnitario\": 5240\r",
+							"            }],\r",
+							"            \"precoTotal\": 6180,\r",
+							"            \"quantidadeTotal\": 3,\r",
+							"            \"idUsuario\": \"oUb7aGkMtSEPf6BZ\",\r",
+							"            \"_id\": \"qbMqntef4iTOwWfg\"\r",
+							"        }]\r",
+							"    }]\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validar o corpo da resposta\", function(){\r",
+							"    pm.response.to.have.jsonSchema(schema)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/carrinhos",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"carrinhos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Busca de Carrinho especifico",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"      url:  \"https://serverest.dev/carrinhos\", \r",
+							"      method: 'GET',\r",
+							"      header: {\r",
+							"        'Accept': 'application/json',\r",
+							"      },\r",
+							"      body: {}\r",
+							"  }, function (err, res) {\r",
+							"    var lista = []\r",
+							"    var data = res.json();\r",
+							"    for (let i = 0; i < data.carrinhos.length; i++) {\r",
+							"        var push_list = lista.push(data.carrinhos[i]._id)\r",
+							"}    \r",
+							"    function RandomizaID() {\r",
+							"        randomItem = lista [Math.floor(Math.random() * lista.length)];\r",
+							"    \r",
+							"    return randomItem\r",
+							"}\r",
+							"\r",
+							"     pm.environment.set(\"CartID\", RandomizaID())\r",
+							"\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/carrinhos/{{CartID}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"carrinhos",
+						"{{CartID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Exlussão de Todos os Carrinhos e Retorna pro Estoque",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 200) {\r",
+							"       if((jsonData.message == \"Registro excluído com sucesso. Estoque dos produtos reabastecido\")) {\r",
+							"            pm.expect(jsonData.message).to.eql(\"Registro excluído com sucesso. Estoque dos produtos reabastecido\")\r",
+							"       } else {\r",
+							"           pm.expect(jsonData.message).to.eql(\"Não foi encontrado carrinho para esse usuário\")\r",
+							"       }\r",
+							"}\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/carrinhos/cancelar-compra",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"carrinhos",
+						"cancelar-compra"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Excluir e retirar do estoque",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status Code is \" + pm.response.code, function () {\r",
+							"if (pm.response.code === 200) {\r",
+							"       if((jsonData.message == \"Não foi encontrado carrinho para esse usuário\")) {\r",
+							"            pm.expect(jsonData.message).to.eql(\"Não foi encontrado carrinho para esse usuário\")\r",
+							"       } else {\r",
+							"           pm.expect(jsonData.message).to.eql(\"Registro excluído com sucesso.\")\r",
+							"       }\r",
+							"}\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/carrinhos/concluir-compra/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"carrinhos",
+						"concluir-compra",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
