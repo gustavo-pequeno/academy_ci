@@ -24,11 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: Homologação
-      url: 'qa-coders-ronbugado.com.br/hmg'
+      url: 'http://191.252.210.196/ronbugado'
     needs: deploy-dev
     steps:
+      - uses: actions/checkout@master
+      - uses: matt-ball/newman-action@master
+        with:
+          collection: RestFull_collection
+          environment: RestFull_environment
       - name: Run a one-line script
         run: echo Deploy HMG
+      
   
   deploy-prd:
     runs-on: ubuntu-latest
