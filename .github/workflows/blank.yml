@@ -25,7 +25,7 @@ jobs:
     environment:
       name: Homologação
       url: 'qa-coders-ronbugado.com.br/hmg'
-    needs: Dev
+    needs: deploy-dev
     steps:
       - name: Run a one-line script
         run: echo Deploy HMG
@@ -35,7 +35,7 @@ jobs:
     environment:
       name: Homologação
       url: 'qa-coders-ronbugado.com.br/prd'
-    needs: build
+    needs: deploy-hmg
     steps:
       - name: Run a one-line script
         run: echo Deploy PRD
