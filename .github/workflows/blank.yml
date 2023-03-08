@@ -1,0 +1,42 @@
+name: CI
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run a one-line script
+        run: echo Hello, world!
+  
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment:
+      name: Dev
+      url: 'qa-coders-ronbugado.com.br/dev'
+    needs: build
+    steps:
+      - name: Run a one-line script
+        run: echo Deploy dev
+        
+  deploy-hmg:
+    runs-on: ubuntu-latest
+    environment:
+      name: Homologação
+      url: 'qa-coders-ronbugado.com.br/hmg'
+    needs: build
+    steps:
+      - name: Run a one-line script
+        run: echo Deploy HMG
+  
+  deploy-prd:
+    runs-on: ubuntu-latest
+    environment:
+      name: Homologação
+      url: 'qa-coders-ronbugado.com.br/prd'
+    needs: build
+    steps:
+      - name: Run a one-line script
+        run: echo Deploy PRD
+        
