@@ -39,7 +39,7 @@ jobs:
   deploy-prd:
     runs-on: ubuntu-latest
     environment:
-      name: Homologação
+      name: Produção
       url: 'qa-coders-ronbugado.com.br/prd'
     needs: deploy-hmg
     steps:
